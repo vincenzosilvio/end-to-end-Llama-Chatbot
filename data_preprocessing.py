@@ -1,24 +1,26 @@
 import pandas as pd
-from transformers import LlamaForCausalLM, LlamaTokenizer, Trainer, TrainingArguments
-from datasets import Dataset
-from sklearn.model_selection import train_test_split
 
-df = pd.read_csv("/home/codespace/.cache/kagglehub/datasets/jerryqu/reddit-conversations/versions/1/casual_data_windows.csv")
-df.dropna(inplace=True)
-
-print(df.head)
-print(df.columns)
-
-#Strip removes spaces at the beginning and at the end of the string
 def preprocess_text(text):
+    """Clean text by stripping whitespace."""
     return text.strip()
 
-for col in ['0','1','2']:
-    df[col] = df[col].apply(preprocess_text)
+def prepare_data(file_path,output_path):
+    df = pd.read_csv(file_path)
+    df.dropna(inplace=True)
+
+    for col in ['0','1','2']:
+        df[col] = df[col].apply(preprocess_text)
 
 
-print(df.head)
+    prepared_data = pd.DataFrame({
+        'input_text': df['0'] + " " + df['1'],
+        'response_text': df['2']
+    })
 
+    prepared_data.to_csv(output_path, index=False)
+    print(f"Processed dataset saved to {output_path}")
 
+if __name__ == "__main__":
+    prepare_data('casual_data_windows.csv', 'prepared_data.csv')
 
 
